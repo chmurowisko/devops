@@ -1,0 +1,63 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "webAppName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of Azure Web App"
+              }
+        },
+      "location": {
+        "type": "string",
+        "defaultValue": "[resourceGroup().location]",
+        "metadata": {
+          "description": "Location for all resources."
+        }
+      }
+    },
+    "variables": {
+      "serverFarmName": "ServerFarm1",
+      "webAppName": "[parameters('webAppName')]"
+    },
+    "resources": [
+      {
+        "name": "[variables('serverFarmName')]",
+        "type": "Microsoft.Web/serverfarms",
+        "location": "[parameters('location')]",
+        "apiVersion": "2016-03-01",
+        "tags": {
+          "displayName": "[variables('serverFarmName')]"
+        },
+        "sku": {
+          "name": "F1",
+          "capacity": 1
+        },
+        "properties": {
+          "name": "[variables('serverFarmName')]"
+        }
+      },
+      {
+        "name": "[variables('webAppName')]",
+        "type": "Microsoft.Web/sites",
+        "location": "[parameters('location')]",
+        "apiVersion": "2016-03-01",
+        "dependsOn": [
+          "[variables('serverFarmName')]"
+        ],
+        "tags": {
+          "displayName": "[variables('webAppName')]"
+        },
+        "properties": {
+          "name": "[variables('webAppName')]",
+          "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('serverFarmName'))]"
+        }
+      }
+    ],
+    "outputs": {
+      "hostName": {
+        "type": "string",
+        "value": "[concat('https://',variables('webAppName'),'.azurewebsites.net')]"
+      }
+    }
+  }
